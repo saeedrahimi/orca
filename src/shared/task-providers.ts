@@ -1,6 +1,13 @@
+import { isForkKeptTaskProvider } from './fork-config'
+
 export type TaskProvider = 'github' | 'gitlab' | 'linear' | 'jira'
 
-export const TASK_PROVIDERS: readonly TaskProvider[] = ['github', 'gitlab', 'linear', 'jira']
+const ALL_TASK_PROVIDERS: readonly TaskProvider[] = ['github', 'gitlab', 'linear', 'jira']
+
+// Why: personal fork keeps only GitHub; filter by KEPT_TASK_PROVIDERS from fork-config
+export const TASK_PROVIDERS: readonly TaskProvider[] = ALL_TASK_PROVIDERS.filter((p) =>
+  isForkKeptTaskProvider(p)
+)
 
 const TASK_PROVIDER_SET = new Set<TaskProvider>(TASK_PROVIDERS)
 

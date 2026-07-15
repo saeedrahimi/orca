@@ -1,4 +1,5 @@
 import { app } from 'electron'
+import { HIDE_COMPUTER_USE, HIDE_EMULATOR } from '../../shared/fork-config'
 import { registerAppHandlers } from './app'
 import { registerCliHandlers } from './cli'
 import { registerPreflightHandlers } from './preflight'
@@ -154,7 +155,10 @@ export function registerCoreHandlers(
   // not load-bearing; both register independent ipcMain channels.
   registerDiagnosticsHandlers()
   registerTerminalRenderDesyncEvidenceHandler()
-  registerComputerUsePermissionHandlers()
+  // Why: fork hides the computer-use subsystem (Windows provider is inert anyway).
+  if (!HIDE_COMPUTER_USE) {
+    registerComputerUsePermissionHandlers()
+  }
   registerSettingsHandlers(store, agentAwakeService)
   registerSkillsHandlers(store)
   if (automations) {
@@ -174,8 +178,11 @@ export function registerCoreHandlers(
   registerPetHandlers()
   registerSessionHandlers(store)
   registerUIHandlers(store)
-  registerEmulatorFrameStreamHandlers()
-  registerEmulatorVideoStreamHandlers()
+  // Why: fork hides the Android emulator subsystem.
+  if (!HIDE_EMULATOR) {
+    registerEmulatorFrameStreamHandlers()
+    registerEmulatorVideoStreamHandlers()
+  }
   registerWorkspaceSpaceHandlers(store)
   registerWorkspacePortHandlers(store)
   registerLocalhostWorktreeLabelHandlers(store)

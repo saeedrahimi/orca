@@ -154,6 +154,7 @@ import { renameWorktreeFolderOnFirstWork } from './agent-hooks/first-work-folder
 import { moveWorktree } from './git/worktree'
 import { getRepoIdFromWorktreeId } from '../shared/worktree-id'
 import { parseWorkspaceKey } from '../shared/workspace-scope'
+import { DISABLE_STAR_NAG, HIDE_EMULATOR, HIDE_MOBILE_COMPANION } from '../shared/fork-config'
 import { setMigrationUnsupportedPtyListener } from './agent-hooks/migration-unsupported-pty-state'
 import {
   clearProviderPtyState,
@@ -2094,9 +2095,12 @@ app.whenReady().then(async () => {
     prepareForCodexLaunch: prepareCodexRuntimeHomeForLaunch,
     prepareForClaudeLaunch: (target) => claudeRuntimeAuth!.prepareForClaudeLaunch(target)
   })
-  starNag = new StarNagService(store, stats)
-  starNag.start()
-  starNag.registerIpcHandlers()
+  // Why: fork should not nag users to star the upstream repository.
+  if (!DISABLE_STAR_NAG) {
+    starNag = new StarNagService(store, stats)
+    starNag.start()
+    starNag.registerIpcHandlers()
+  }
   runtimeService.setAgentBrowserBridge(
     new AgentBrowserBridge(browserManager, {
       onTabsChanged: (worktreeId) => runtimeService.notifyMobileSessionTabsChanged(worktreeId)
@@ -2104,10 +2108,11 @@ app.whenReady().then(async () => {
   )
 
   // Emulator bridge (serve-sim). macOS-only feature (gated in CLI/runtime); always ship like agent-browser.
-  // Why: only Orca-managed or explicitly attached helpers belong to a workspace;
-  // externally started serve-sim processes must remain independent from Orca.
-  const emulatorBridge = new EmulatorBridge()
-  runtimeService.setEmulatorBridge(emulatorBridge)
+  // Why: fork hides the Android emulator subsystem (unused on Windows + WSL).
+  if (!HIDE_EMULATOR) {
+    const emulatorBridge = new EmulatorBridge()
+    runtimeService.setEmulatorBridge(emulatorBridge)
+  }
   nativeTheme.themeSource = store.getSettings().theme ?? 'system'
   if (shouldInstallManagedHooks(is.dev)) {
     // Why: the persisted off switch must run before any auto-install path so
@@ -2263,7 +2268,10 @@ app.whenReady().then(async () => {
       : {}),
     webClientRoot: getBundledWebClientRoot()
   })
-  registerMobileHandlers(runtimeRpc, { getRelayStatus: () => desktopRelayStatus })
+  // Why: fork hides the mobile pairing UI/handlers (unused on this fork).
+  if (!HIDE_MOBILE_COMPANION) {
+    registerMobileHandlers(runtimeRpc, { getRelayStatus: () => desktopRelayStatus })
+  }
 
   startTerminalRuntimeStartupServices()
   app.on('activate', requestDesktopActivation)

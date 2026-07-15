@@ -82,6 +82,11 @@ import {
 import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 import { useLinearProviderConnected } from '@/hooks/useLinearProviderConnected'
 import { translate } from '@/i18n/i18n'
+import {
+  HIDE_COMPUTER_USE,
+  HIDE_EMULATOR,
+  HIDE_MOBILE_COMPANION
+} from '../../../shared/fork-config'
 
 export { isWebClientLocation } from '@/lib/web-client-location'
 
@@ -203,17 +208,25 @@ export function buildSettingsNavigationMetadata({
       : []),
     ...(showDesktopOnlySettings
       ? [
-          {
-            id: 'computer-use',
-            title: translate('auto.hooks.useSettingsNavigationMetadata.b35e92364b', 'Computer Use'),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.0059bd17f3',
-              'Enable agents to control any app on your computer.'
-            ),
-            icon: MousePointerClick,
-            searchEntries: getComputerUsePaneSearchEntries(),
-            group: 'capabilities'
-          },
+          // Why: fork hides computer-use
+          ...(!HIDE_COMPUTER_USE
+            ? [
+                {
+                  id: 'computer-use',
+                  title: translate(
+                    'auto.hooks.useSettingsNavigationMetadata.b35e92364b',
+                    'Computer Use'
+                  ),
+                  description: translate(
+                    'auto.hooks.useSettingsNavigationMetadata.0059bd17f3',
+                    'Enable agents to control any app on your computer.'
+                  ),
+                  icon: MousePointerClick,
+                  searchEntries: getComputerUsePaneSearchEntries(),
+                  group: 'capabilities'
+                }
+              ]
+            : []),
           {
             id: 'voice',
             title: translate('auto.hooks.useSettingsNavigationMetadata.6a50cdcd7c', 'Voice'),
@@ -282,7 +295,8 @@ export function buildSettingsNavigationMetadata({
       searchEntries: getIntegrationsPaneSearchEntries(),
       group: 'setup'
     },
-    ...(showDesktopOnlySettings
+    // Why: fork hides mobile companion
+    ...(showDesktopOnlySettings && !HIDE_MOBILE_COMPANION
       ? [
           {
             id: 'mobile',
@@ -365,7 +379,8 @@ export function buildSettingsNavigationMetadata({
           }
         ]
       : []),
-    ...(showDesktopOnlySettings
+    // Why: fork hides mobile emulator
+    ...(showDesktopOnlySettings && !HIDE_EMULATOR
       ? [
           {
             id: 'mobile-emulator',

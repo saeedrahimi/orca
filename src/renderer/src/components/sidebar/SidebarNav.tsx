@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAppStore } from '@/store'
 import { cn } from '@/lib/utils'
 import type { GlobalSettings } from '../../../../shared/types'
+import { HIDE_AUTOMATIONS_BUTTON, HIDE_MOBILE_COMPANION } from '../../../../shared/fork-config'
 import { useActivityUnreadCount } from '@/components/activity/useActivityUnreadCount'
 import { useShortcutKeyComboDetails } from '@/hooks/useShortcutLabel'
 import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'
@@ -27,13 +28,15 @@ export function shouldShowAgentsButton(
 export function shouldShowMobileButton(
   settings: Pick<GlobalSettings, 'showMobileButton'> | null | undefined
 ): boolean {
-  return settings?.showMobileButton !== false
+  // Why: fork hides mobile companion
+  return !HIDE_MOBILE_COMPANION && settings?.showMobileButton !== false
 }
 
 export function shouldShowAutomationsButton(
   settings: Pick<GlobalSettings, 'showAutomationsButton'> | null | undefined
 ): boolean {
-  return settings?.showAutomationsButton !== false
+  // Why: fork hides automations
+  return !HIDE_AUTOMATIONS_BUTTON && settings?.showAutomationsButton !== false
 }
 
 const SidebarNav = React.memo(function SidebarNav() {

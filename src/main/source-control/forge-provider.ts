@@ -4,6 +4,7 @@ import type {
   HostedReviewInfo,
   HostedReviewProvider
 } from '../../shared/hosted-review'
+import { isForkKeptForge } from '../../shared/fork-config'
 import {
   getAzureDevOpsPullRequest,
   getAzureDevOpsPullRequestForBranchOrThrow,
@@ -277,13 +278,18 @@ const giteaForgeProvider = {
 
 // Why: provider order preserves existing branch-status behavior when remotes
 // could be interpreted by more than one hosting integration.
-export const FORGE_PROVIDERS = [
+const ALL_FORGE_PROVIDERS = [
   gitLabForgeProvider,
   gitHubForgeProvider,
   bitbucketForgeProvider,
   azureDevOpsForgeProvider,
   giteaForgeProvider
 ] as const satisfies readonly ForgeProvider[]
+
+// Why: personal fork keeps only GitHub; filter by KEPT_FORGES from fork-config
+export const FORGE_PROVIDERS: readonly ForgeProvider[] = ALL_FORGE_PROVIDERS.filter((p) =>
+  isForkKeptForge(p.id)
+)
 
 export function getForgeProviderById(id: ForgeProviderId): ForgeProvider {
   return FORGE_PROVIDERS.find((provider) => provider.id === id) ?? gitHubForgeProvider

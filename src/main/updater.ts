@@ -3,6 +3,7 @@ import { app, BrowserWindow, powerMonitor } from 'electron'
 import { is } from '@electron-toolkit/utils'
 import type { UpdateCheckOptions, UpdateStatus } from '../shared/types'
 import { isWindowsSignatureCheckUnavailableFailure } from '../shared/updater-windows-signature-check'
+import { DISABLE_UPDATER } from '../shared/fork-config'
 import { killAllPty } from './ipc/pty'
 import { withUpdaterSpan } from './observability/instrumentation'
 import { loadElectronAutoUpdater, type ElectronAutoUpdater } from './electron-updater-loader'
@@ -1371,6 +1372,11 @@ export function setupAutoUpdater(
     setDismissedUpdateNudgeId?: (id: string | null) => void
   }
 ): void {
+  // Why: fork must not pull upstream builds (signature check fails on Windows).
+  if (DISABLE_UPDATER) {
+    return
+  }
+
   mainWindowRef = mainWindow
   onBeforeQuitCleanup = opts?.onBeforeQuit ?? null
   persistLastUpdateCheckAt = opts?.setLastUpdateCheckAt ?? null

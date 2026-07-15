@@ -1,5 +1,6 @@
 import type { TuiAgent } from './types'
-import { isTuiAgent } from './tui-agent-config'
+import { isTuiAgent, TUI_AGENT_CONFIG } from './tui-agent-config'
+import { isForkKeptAgent } from './fork-config'
 
 // Keep this order in sync with the desktop agent catalog. It defines the
 // automatic fallback priority when the user has not chosen a default agent.
@@ -40,9 +41,11 @@ export const TUI_AGENT_AUTO_PICK_ORDER = [
   'openclaw'
 ] as const satisfies readonly TuiAgent[]
 
-// Why: fresh installs should expose Claude Agent Teams in agent pickers; the
-// persistence migration separately preserves the old hidden default for legacy profiles.
-export const DEFAULT_DISABLED_TUI_AGENTS = [] as const satisfies readonly TuiAgent[]
+// Why: fork hides all agents not in KEPT_AGENTS. Derived from TUI_AGENT_CONFIG
+// to disable every non-kept agent by default.
+export const DEFAULT_DISABLED_TUI_AGENTS: readonly TuiAgent[] = (
+  Object.keys(TUI_AGENT_CONFIG) as TuiAgent[]
+).filter((agent) => !isForkKeptAgent(agent))
 
 export function pickTuiAgent(
   preferred: TuiAgent | 'blank' | null | undefined,
