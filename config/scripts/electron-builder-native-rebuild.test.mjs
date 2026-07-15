@@ -61,7 +61,9 @@ describe('electron-builder native rebuild hook', () => {
       ],
       [
         process.execPath,
-        ['config/scripts/rebuild-native-deps.mjs', '--platform=win32', '--arch=x64', '--force'],
+        // Personal fork: no --force on win32 so the rebuild script probes the
+        // node-pty N-API prebuilds instead of invoking node-gyp (needs no MSVC).
+        ['config/scripts/rebuild-native-deps.mjs', '--platform=win32', '--arch=x64'],
         expect.objectContaining({ stdio: 'inherit' })
       ]
     ])

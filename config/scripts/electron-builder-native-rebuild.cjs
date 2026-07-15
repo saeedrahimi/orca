@@ -29,12 +29,17 @@ function buildNativeRebuildArgs(context) {
   const platform = readPlatformName(context?.platform)
   const arch = readArchName(context?.arch)
 
-  return [
-    'config/scripts/rebuild-native-deps.mjs',
-    `--platform=${platform}`,
-    `--arch=${arch}`,
-    '--force'
-  ]
+  const args = ['config/scripts/rebuild-native-deps.mjs', `--platform=${platform}`, `--arch=${arch}`]
+
+  // Personal fork: node-pty ships ABI-stable N-API prebuilds for win32, and the
+  // rebuild script never needs a patched source build there. Skipping --force
+  // lets it probe the prebuilds instead of invoking node-gyp, so packaging works
+  // without MSVC C++ Build Tools installed.
+  if (platform !== 'win32') {
+    args.push('--force')
+  }
+
+  return args
 }
 
 function readPlatformName(platform) {
