@@ -187,6 +187,12 @@ module.exports = {
     executableName: 'Orca',
     // Personal fork: unsigned local build (no SignPath cert). SmartScreen shows
     // "Unknown publisher" -> "Run anyway" once.
+    // Skip rcedit exe stamping: it's driven by the app-builder Go binary, which
+    // downloads winCodeSign-2.6.0 and extracts macOS dylib symlinks that fail on
+    // Windows without the symlink privilege (Developer Mode / elevation). We have
+    // no cert to sign with anyway, so skip it. Cost: Orca.exe keeps Electron's
+    // default icon/version metadata instead of Orca's.
+    signAndEditExecutable: false,
     extraResources: [
       ...commonExtraResources,
       ...createPackagedRuntimeNodeModuleResources('win32'),
