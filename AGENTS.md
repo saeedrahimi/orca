@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## Personal Fork
+
+This repo is a **personal fork** of `stablyai/orca`. Before changing feature
+availability, branding, build, or syncing with upstream, read [`FORK.md`](./FORK.md).
+All fork divergence is concentrated in `src/shared/fork-config.ts` plus one-line
+chokepoint reads — edit that module first, and keep changes small so upstream
+rebases stay clean.
+
 ## Design System
 
 All UI work — layout, color, typography, spacing, component selection, UX behavior — must follow [`docs/STYLEGUIDE.md`](./docs/STYLEGUIDE.md). Use the tokens defined in `src/renderer/src/assets/main.css` (the canonical source) and the shadcn primitives in `src/renderer/src/components/ui/`. Don't invent new color values, font sizes, or shadow tiers when a documented one already covers the role. When STYLEGUIDE.md is silent, follow the resolution order in its final section.
