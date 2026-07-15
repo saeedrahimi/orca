@@ -185,11 +185,8 @@ module.exports = {
   },
   win: {
     executableName: 'Orca',
-    // Why: Windows installers are signed after electron-builder packaging by
-    // SignPath, so the packager cannot infer the updater publisherName.
-    signtoolOptions: {
-      publisherName: 'SignPath Foundation'
-    },
+    // Personal fork: unsigned local build (no SignPath cert). SmartScreen shows
+    // "Unknown publisher" -> "Run anyway" once.
     extraResources: [
       ...commonExtraResources,
       ...createPackagedRuntimeNodeModuleResources('win32'),
@@ -390,12 +387,9 @@ module.exports = {
   // on Intel Macs. The beforeBuild hook performs Orca's targeted rebuild and
   // returns false so electron-builder does not rebuild optional cpu-features.
   npmRebuild: true,
-  publish: {
-    provider: 'github',
-    owner: 'stablyai',
-    repo: 'orca',
-    releaseType: 'release'
-  }
+  // Personal fork: no release feed. Explicit null disables publishing/auto-update
+  // pointer (bundled app-update.yml no longer points at stablyai/orca).
+  publish: null
 }
 
 function chmodUnixCliLaunchers(resourcesDir, electronPlatformName) {
