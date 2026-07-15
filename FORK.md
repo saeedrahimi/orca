@@ -73,6 +73,11 @@ touch a chokepoint file if you are adding a *new* kind of gate.
 - `publish: null` — no release feed; bundled `app-update.yml` no longer points at upstream.
 - `appId` / `productName` **kept as upstream** → the fork *replaces* the installed Orca and shares its userData dir. (Change `appId` only if you want side-by-side installs.)
 
+- `win.signAndEditExecutable: false` — **the reason `build:win` works without
+  Windows Developer Mode / an elevated shell** (see §4). Keep this. Cost: the exe
+  keeps Electron's default icon/version metadata (cosmetic; in-app branding is
+  unaffected).
+
 `config/scripts/electron-builder-native-rebuild.cjs`:
 - The beforeBuild hook drops `--force` on **win32** so the rebuild script probes
   node-pty's N-API prebuilds instead of invoking node-gyp. **This is why packaging
@@ -91,12 +96,28 @@ launcher compiles with the built-in `csc.exe`, and node-pty uses prebuilds (§3)
 |---|---|---|
 | `pnpm run dev` | hot reload | day-to-day |
 | `pnpm run build:unpack` | `dist/win-unpacked/Orca.exe` | fast smoke test (proven to build + boot) |
-| `pnpm run build:win` | `dist/orca-windows-setup.exe` (NSIS) | real installer |
+| `pnpm run build:win` | `dist/orca-windows-setup.exe` (NSIS) | real installer (proven, no Developer Mode) |
 
-**`build:win` requires Windows Developer Mode ON** (Settings → System → For
-developers). Without it, electron-builder's `winCodeSign` extraction fails with
-"Cannot create symbolic link : A required privilege is not held by the client"
-(it unpacks macOS dylib symlinks). `build:unpack` (`--dir`) sidesteps this.
+**Both build commands work on a stock, non-elevated Windows shell** — no
+Developer Mode required. This depends on two fork edits; if a rebase drops either,
+the symptom is a hard build failure, not a warning:
+
+- The `winCodeSign` symlink trap: the app-builder **Go binary** runs `rcedit` to
+  stamp the exe icon/version, which downloads `winCodeSign-2.6.0.7z` and extracts
+  its macOS dylib **symlinks** with `7za -snl`. Creating symlinks on Windows needs
+  a privilege absent without Developer Mode / elevation → the build dies with
+  *"Cannot create symbolic link : A required privilege is not held by the client"*.
+  The fork sidesteps this with `win.signAndEditExecutable: false` (§3), which skips
+  rcedit entirely. There's no signing cert anyway.
+  - Dead ends (don't retry these): `toolsets: { winCodeSign }` only redirects the
+    JS signing path, **not** the Go rcedit path. The Go binary ignores
+    `ELECTRON_BUILDER_RCEDIT_PATH` and randomizes its cache-dir hash per run, so
+    neither env-override nor pre-seeding the cache works.
+- MSVC: covered by the `--force` skip (§3).
+
+The `signing with signtool.exe` lines in `build:win` output are harmless — that
+message prints *before* the no-cert check; with no cert, signing is skipped and
+the installer is simply unsigned.
 
 ### Deploy script: `scripts/update-local.ps1`
 ```
@@ -130,6 +151,9 @@ should be rare and small. When they happen:
 4. **`electron-builder-native-rebuild.cjs`** — if upstream restores unconditional
    `--force`, re-apply the win32 skip (§3), or `build:win`/`build:unpack` will
    demand MSVC again.
+5. **`electron-builder.config.cjs`** — if a rebase drops `signAndEditExecutable:
+   false`, `build:win` will fail again on the winCodeSign symlink trap (§4).
+   Re-apply it.
 
 ### After every sync — verify before deploying
 ```bash
