@@ -14,8 +14,8 @@ export const KEPT_AGENTS = [
 
 // Source-control review + task providers kept. GitHub is already the hard-coded
 // default/fallback everywhere, so the others hide without breaking anything.
-export const KEPT_FORGES = ['github'] as const
-export const KEPT_TASK_PROVIDERS = ['github'] as const
+export const KEPT_FORGES = ['github', 'gitlab'] as const
+export const KEPT_TASK_PROVIDERS = ['github', 'gitlab', 'jira'] as const
 
 // Hygiene: keep the fork from phoning home to / colliding with upstream.
 export const DISABLE_UPDATER = true
@@ -25,7 +25,7 @@ export const DISABLE_TELEMETRY = true // belt-and-suspenders; unofficial builds 
 // Heavy subsystems hidden from the UI (code kept, just not surfaced).
 export const HIDE_EMULATOR = true
 export const HIDE_MOBILE_COMPANION = true
-export const HIDE_AUTOMATIONS_BUTTON = true
+export const HIDE_AUTOMATIONS_BUTTON = false
 export const HIDE_COMPUTER_USE = true
 // Kept and unchanged: speech (sherpa-onnx), browser (agent-browser), native-chat.
 

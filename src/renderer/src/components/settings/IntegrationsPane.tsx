@@ -1,5 +1,6 @@
-// Why: personal fork keeps only GitHub; other forge/task cards are hidden.
-import { GitHubIntegrationCard } from './source-control-integration-cards'
+// Why: personal fork keeps GitHub + GitLab review providers and Jira tasks; other cards are hidden.
+import { GitHubIntegrationCard, GitLabIntegrationCard } from './source-control-integration-cards'
+import { JiraIntegrationCard } from './task-tracker-integration-cards'
 import { useIntegrationProviderStatusRefresh } from './use-integration-provider-status-refresh'
 import { translate } from '@/i18n/i18n'
 export { getIntegrationsPaneSearchEntries } from './integrations-search'
@@ -23,6 +24,24 @@ export function IntegrationsPane(): React.JSX.Element {
         </div>
         <div className="space-y-3">
           <GitHubIntegrationCard />
+          <GitLabIntegrationCard />
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold text-foreground">
+            {translate('auto.components.settings.IntegrationsPane.70e885705b', 'Task providers')}
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            {translate(
+              'auto.components.settings.IntegrationsPane.3ba07f933b',
+              'Connect issue trackers Orca can use to browse tasks and start workspaces with linked context.'
+            )}
+          </p>
+        </div>
+        <div className="space-y-3">
+          <JiraIntegrationCard />
         </div>
       </section>
     </div>
