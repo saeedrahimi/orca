@@ -134,8 +134,17 @@ overwrite locked files; the daemon-stop hook only runs on real uninstall).
 
 ```bash
 git fetch origin
-git rebase origin/main            # personal-fork onto upstream
+git log --oneline --stat personal-fork..origin/main   # review what's incoming FIRST
+git rebase origin/main                                # personal-fork onto upstream
 ```
+
+**Always summarize the incoming upstream commits before (or right after) rebasing**
+so it's clear what changed. For each incoming commit, note: subject, whether it
+touches fork surface (desktop renderer/main) or fork-hidden surface (`mobile/**`,
+emulator, telemetry, updater), and any file overlapping a chokepoint in §2. A
+`git log --oneline --stat personal-fork..origin/main` (before rebase) or
+`ORIG_HEAD..HEAD` (after) gives the file breakdown; mobile-only and docs-only
+commits are no-ops for the fork's visible behavior.
 
 Because divergence is concentrated in `fork-config.ts` + one-liners, conflicts
 should be rare and small. When they happen:
