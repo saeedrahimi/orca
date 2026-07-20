@@ -409,3 +409,36 @@ describe('issue #7236: PowerShell setup-runner command delivery', () => {
     expect((decoded.slice(decoded.lastIndexOf(command)).match(/"/g) ?? []).length % 2).toBe(0)
   })
 })
+
+// Regression guard (fork): under ConstrainedLanguage (WDAC/AppLocker on managed
+// Windows) the OSC-133 bootstrap hits a top-level `return`, which would abort the
+// whole -EncodedCommand and swallow the appended startup command — the shell
+// opened but `claude` never launched. Scoping the bootstrap in `& { }` keeps
+// those returns local so the startup command always runs after it.
+describe('ConstrainedLanguage: startup command survives bootstrap early-return', () => {
+  it('wraps the bootstrap in a script block so its returns cannot skip the command', () => {
+    const result = resolveWindowsShellLaunchArgs(
+      'powershell.exe',
+      'C:\\Users\\alice\\repo',
+      'C:\\Users\\alice',
+      undefined,
+      'claude'
+    )
+
+    expect(result.startupCommandDeliveredInShellArgs).toBe(true)
+    const decoded = Buffer.from(result.shellArgs[3] ?? '', 'base64').toString('utf16le')
+    // Bootstrap is scoped in `& { ... }`; the command follows the closing brace.
+    expect(decoded).toContain('& {')
+    expect(decoded).toMatch(/}\nclaude$/)
+  })
+
+  it('leaves the standalone bootstrap (no startup command) unscoped', () => {
+    const result = resolveWindowsShellLaunchArgs('powershell.exe', 'C:\\', 'C:\\Users\\alice')
+    expect(result.shellArgs).toEqual([
+      '-NoLogo',
+      '-NoExit',
+      '-EncodedCommand',
+      encodePowerShellCommand(getPowerShellOsc133Bootstrap())
+    ])
+  })
+})

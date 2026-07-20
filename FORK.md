@@ -58,6 +58,14 @@ touch a chokepoint file if you are adding a *new* kind of gate.
 | `src/renderer/src/components/sidebar/SidebarNav.tsx` | hides automations + mobile buttons |
 | `src/renderer/src/hooks/useSettingsNavigationMetadata.ts` | hides computer-use / emulator / mobile settings panes |
 
+### Fork patches outside `fork-config.ts` (must survive rebases)
+These are fork-specific fixes to upstream code, not config gates. Re-apply if a
+rebase drops them.
+
+| File | Patch | Why |
+|---|---|---|
+| `src/main/providers/windows-shell-args.ts` (`getPowerShellEncodedCommand`) | Wrap the OSC-133 bootstrap in `& { … }` before the appended startup command | Upstream (#9500) appends the agent launch (`claude`) after the bootstrap inside `-EncodedCommand`. Under **ConstrainedLanguage** (WDAC/AppLocker on managed Windows) the bootstrap's top-level `return` guards abort the whole script and swallow the launch — PowerShell opens but `claude` never runs. Scoping the bootstrap keeps those returns local. Guarded by tests in `windows-shell-args.test.ts`. |
+
 ### Do NOT touch (load-bearing — removing these breaks the app)
 - **`OrcaRuntimeRpcServer`** (`index.ts`) — shared with the web client. Keep.
 - **Automations *service*** (`index.ts`, ~openMainWindow) — throws if null. Only the *button* is hidden, never the service.

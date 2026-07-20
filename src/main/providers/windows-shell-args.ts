@@ -89,7 +89,12 @@ function getPowerShellEncodedCommand(startupCommand?: string): {
     return { encodedCommand: encodePowerShellCommand(bootstrap) }
   }
 
-  const command = `${bootstrap}\n${startupCommand}`
+  // Why (fork): under ConstrainedLanguage (WDAC/AppLocker on managed Windows)
+  // the bootstrap hits its top-level `return` guards, which abort the entire
+  // -EncodedCommand script and swallow the appended startup command — the shell
+  // opens but `claude` never launches. Wrapping the bootstrap in `& { }` scopes
+  // those returns to the block so the startup command always runs after it.
+  const command = `& {\n${bootstrap}\n}\n${startupCommand}`
   const encodedCommand = encodePowerShellCommand(command)
   // Why: -EncodedCommand expands UTF-16 text into base64; keep a conservative
   // margin under Windows CreateProcess' 32,767-character command line limit.
