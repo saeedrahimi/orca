@@ -36,7 +36,7 @@ touch a chokepoint file if you are adding a *new* kind of gate.
 `fork-config.ts` exports:
 
 - `KEPT_AGENTS` — the only TUI agents surfaced (`claude`, `claude-agent-teams`, `copilot`).
-- `KEPT_FORGES` / `KEPT_TASK_PROVIDERS` — `['github']` only.
+- `KEPT_FORGES` — `['github', 'gitlab']`; `KEPT_TASK_PROVIDERS` — `['github', 'gitlab', 'jira']`.
 - `DISABLE_UPDATER`, `DISABLE_STAR_NAG`, `DISABLE_TELEMETRY`.
 - `HIDE_EMULATOR`, `HIDE_MOBILE_COMPANION`, `HIDE_AUTOMATIONS_BUTTON`, `HIDE_COMPUTER_USE`.
 - Predicates `isForkKeptAgent` / `isForkKeptForge` / `isForkKeptTaskProvider`
