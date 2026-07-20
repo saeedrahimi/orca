@@ -11,10 +11,10 @@ const scriptPath = import.meta.filename
 const projectDir = resolve(import.meta.dirname, '../..')
 const runtime = readRuntimeArg()
 
-const NATIVE_MODULES = [
-  'node-pty',
-  ...(process.platform === 'win32' ? ['windows-native-registry'] : [])
-]
+// Personal fork: windows-native-registry@3.2.2 ships no prebuilds and always
+// needs node-gyp/MSVC to compile (see rebuild-native-deps.mjs); the fork skips
+// building it, so it must not be checked here either.
+const NATIVE_MODULES = ['node-pty']
 const NODE_PTY_CONPTY_RUNTIME_FILES = ['conpty.dll', 'OpenConsole.exe']
 const CHILD_CHECK_FLAG = '--check-only'
 

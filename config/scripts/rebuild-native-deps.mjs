@@ -48,7 +48,12 @@ const electronVersion = JSON.parse(
   readFileSync(resolve(electronPackageDir, 'package.json'), 'utf8')
 ).version
 
-const ignoreModules = ['cpu-features']
+// Personal fork: windows-native-registry@3.2.2 ships no prebuilds and always
+// needs node-gyp/MSVC to compile from source, which would reintroduce the
+// Build Tools requirement build:win is designed to avoid (see FORK.md §4).
+// windows-user-path-registry.ts already degrades to an 'unknown' read result
+// when the module fails to load, so skipping its native build is safe.
+const ignoreModules = ['cpu-features', 'windows-native-registry']
 const NODE_PTY_CONPTY_RUNTIME_FILES = ['conpty.dll', 'OpenConsole.exe']
 
 if (ignoreModules.length > 0) {
